@@ -12,6 +12,7 @@ public class Plansza {
 
     public Plansza(ArrayList<Pole> listaPol) {
         this.listaPol = listaPol;
+        this.liczbaStrzalow = 0;
     }
 
     public Boolean getTuraWalki() {

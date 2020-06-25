@@ -1,7 +1,9 @@
 package com.demo.springboot.rest;
 
+import com.demo.springboot.Service.AI_PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +28,19 @@ import java.util.Map;
             return new ResponseEntity<>(serverTestMessage, HttpStatus.OK);
         }
 
+
+        @Autowired
+        private AI_PlayerService ai_playerService;
         @CrossOrigin
         @GetMapping(value = "/statki/strzelaj/{id_pola}")
         public ResponseEntity<Void> odbierzStrzal(@PathVariable ("id_pola") int id_pola) {
             LOGGER.info("### Serwer otrzymał id pola: {}", id_pola);
+
+
+
+            ai_playerService.inicjalizujPlansze();
+            ai_playerService.ustawFlote();
+            LOGGER.info("AI");
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
