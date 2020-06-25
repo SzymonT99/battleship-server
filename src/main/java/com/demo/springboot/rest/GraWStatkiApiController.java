@@ -33,7 +33,7 @@ import java.util.Map;
         private AI_PlayerService ai_playerService;
         @CrossOrigin
         @GetMapping(value = "/statki/strzelaj/{id_pola}")
-        public ResponseEntity<Void> odbierzStrzal(@PathVariable ("id_pola") int id_pola) {
+        public ResponseEntity<Void> odbierzStrzal(@PathVariable ("id_pola") int id_pola) throws Exception {
             LOGGER.info("### Serwer otrzymał id pola: {}", id_pola);
 
 
