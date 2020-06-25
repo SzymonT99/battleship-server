@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -59,32 +60,48 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     public void ustawStatek(Statek statek){
         int id = ThreadLocalRandom.current().nextInt(1, 101);    // czubek statku
         System.out.println("wylosowane id: " + id);
-        Pole pole = planszaGracza.getListaPol().get(id);
+        Pole pole = planszaGracza.getListaPol().get(id-1);
         statek.dodajPole(pole);
-        int[] dostepne = {id-1, id+1, id-10, id+10};
+
+        List<Integer> dostepne = new ArrayList<>();
+        dostepne.add(id-1);   //y    kierunek
+        dostepne.add(id+1);   //y    kierunek
+        dostepne.add(id-10);  //x    kierunek
+        dostepne.add(id+10);  //x    kierunek
+        //int[] dostepne = {id-1, id+1, id-10, id+10};
         //id = ThreadLocalRandom.current().nextInt(dostepne.length);
 
-        id = dostepne[ThreadLocalRandom.current().nextInt(dostepne.length)];
+        id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
         Pole drugie_pole = planszaGracza.getListaPol().get(id);
         //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
         System.out.println("wylosowane id kierunku: " + id);
         if (drugie_pole.getWsp_x() == pole.getWsp_x()) {
             statek.setKierunek('x');
+            dostepne.remove(0);
+            dostepne.remove(0);
             //return pierwsze.getWsp_y() + 1 == drugie_pole.getWsp_y() || pierwsze.getWsp_y() - 1 == drugie_pole.getWsp_y();
         } else if (drugie_pole.getWsp_y() == pole.getWsp_y()) {
             statek.setKierunek('y');
+            dostepne.remove(3);
+            dostepne.remove(2);  // zerowy znika, więc 1 wskakuje na jego miejsce
             //return pierwsze.getWsp_x() + 1 == pole.getWsp_x() || pierwsze.getWsp_x() - 1 == pole.getWsp_x();
         }
         statek.dodajPole(drugie_pole);
+        dostepne.remove(Integer.valueOf(id));
         System.out.println("wylosowany kierunek : " + statek.getKierunek());
         while (statek.getListaPol().size() != statek.getDlugosc()){
-            dostepne[0]=id-1;
-            dostepne[1]=id+1;
-            dostepne[2]=id-10;
-            dostepne[3]=id+10;
-            id = dostepne[ThreadLocalRandom.current().nextInt(dostepne.length)];
+            if(statek.getKierunek()=='x'){
+                dostepne.add(id-10);
+                dostepne.add(id+10);
+            }
+            else if (statek.getKierunek()=='y'){
+                dostepne.add(id-1);
+                dostepne.add(id+1);
+            }
+            id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
             pole = planszaGracza.getListaPol().get(id);
-            statek.dodajPole(pole);
+            if(pole.getStan()==0)  statek.dodajPole(pole);
+            dostepne.remove(Integer.valueOf(id));
         }
         // pętla losująca pola statku
         // wypisuję pola statku dla sprawdzenia
