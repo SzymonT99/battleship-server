@@ -64,26 +64,35 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         statek.dodajPole(pole);
 
         List<Integer> dostepne = new ArrayList<>();
-        dostepne.add(id-1);   //y    kierunek
-        dostepne.add(id+1);   //y    kierunek
-        dostepne.add(id-10);  //x    kierunek
-        dostepne.add(id+10);  //x    kierunek
+        if(id>1 && (id-1)%10!=0)
+            dostepne.add(id-1);   //y    kierunek
+        if(id<100 && id%10!=0)
+            dostepne.add(id+1);   //y    kierunek
+        if(id>10)
+            dostepne.add(id-10);  //x    kierunek
+        if(id<90)
+            dostepne.add(id+10);  //x    kierunek
+        int tmpID=id;
         //int[] dostepne = {id-1, id+1, id-10, id+10};
         //id = ThreadLocalRandom.current().nextInt(dostepne.length);
 
         id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
-        Pole drugie_pole = planszaGracza.getListaPol().get(id);
-        //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
         System.out.println("wylosowane id kierunku: " + id);
+        Pole drugie_pole = planszaGracza.getListaPol().get(id-1);
+        //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
         if (drugie_pole.getWsp_x() == pole.getWsp_x()) {
             statek.setKierunek('x');
-            dostepne.remove(0);
-            dostepne.remove(0);
+            //dostepne.remove(0);
+            //dostepne.remove(0);
+            dostepne.remove(Integer.valueOf(tmpID-1));
+            dostepne.remove(Integer.valueOf(tmpID+1));
             //return pierwsze.getWsp_y() + 1 == drugie_pole.getWsp_y() || pierwsze.getWsp_y() - 1 == drugie_pole.getWsp_y();
         } else if (drugie_pole.getWsp_y() == pole.getWsp_y()) {
             statek.setKierunek('y');
-            dostepne.remove(3);
-            dostepne.remove(2);  // zerowy znika, więc 1 wskakuje na jego miejsce
+                //dostepne.remove(3);
+                //dostepne.remove(2);  // zerowy znika, więc 1 wskakuje na jego miejsce
+            dostepne.remove(Integer.valueOf(tmpID-10));
+            dostepne.remove(Integer.valueOf(tmpID+10));
             //return pierwsze.getWsp_x() + 1 == pole.getWsp_x() || pierwsze.getWsp_x() - 1 == pole.getWsp_x();
         }
         statek.dodajPole(drugie_pole);
@@ -91,15 +100,29 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         System.out.println("wylosowany kierunek : " + statek.getKierunek());
         while (statek.getListaPol().size() != statek.getDlugosc()){
             if(statek.getKierunek()=='x'){
-                dostepne.add(id-10);
-                dostepne.add(id+10);
+                if(id-10<1)
+                    dostepne.add(id+10);
+                else if(id+10>=101)
+                    dostepne.add(id-10);
+                else{
+                    dostepne.add(id+10);
+                    dostepne.add(id-10);
+                }
             }
             else if (statek.getKierunek()=='y'){
-                dostepne.add(id-1);
-                dostepne.add(id+1);
+                if(id==1 || id==11 || id==21 || id==31 || id==41 || id==51 || id==61 || id==71 || id==81 || id==91)
+                    dostepne.add(id+1);
+                else if(id==10 || id==20 || id==30 || id==40 || id==50 || id==60 || id==70 || id==80 || id==90 || id==100)
+                    dostepne.add(id-1);
+                else{
+                    dostepne.add(id+1);
+                    dostepne.add(id-1);
+                }
             }
+
             id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
-            pole = planszaGracza.getListaPol().get(id);
+            System.out.println("wylosowane kolejne id : " + id);
+            pole = planszaGracza.getListaPol().get(id-1);
             if(pole.getStan()==0)  statek.dodajPole(pole);
             dostepne.remove(Integer.valueOf(id));
         }
@@ -109,6 +132,29 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         for(int i=0;i<lista.size();i++){
             System.out.println("Statek id: " + statek.getId() + "id: " + lista.get(i).getId() + "x: "+ lista.get(i).getWsp_x() + " y: " + lista.get(i).getWsp_y());
 
+        }
+    }
+
+    public void dodajDostepne(char kierunek, int id, List<Integer> dostepne){
+        if(kierunek=='x'){
+            if(id-10<1)
+                dostepne.add(id+10);
+            else if(id+10>=101)
+                dostepne.add(id-10);
+            else{
+                dostepne.add(id+10);
+                dostepne.add(id-10);
+            }
+        }
+        else if (kierunek=='y'){
+            if(id==1 || id==11 || id==21 || id==31 || id==41 || id==51 || id==61 || id==71 || id==81 || id==91)
+                dostepne.add(id+1);
+            else if(id==10 || id==20 || id==30 || id==40 || id==50 || id==60 || id==70 || id==80 || id==90 || id==100)
+                dostepne.add(id-1);
+            else{
+                dostepne.add(id+1);
+                dostepne.add(id-1);
+            }
         }
     }
 
