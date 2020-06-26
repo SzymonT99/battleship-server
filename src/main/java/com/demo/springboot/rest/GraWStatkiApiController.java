@@ -54,7 +54,33 @@ import java.util.Map;
             return new ResponseEntity<>(id, HttpStatus.OK);
         }
 
+        @CrossOrigin
+        @GetMapping(value = "/statki/strzal_AI")
+        public ResponseEntity<Pole> strzalAI(){
+            LOGGER.info("### Tura strzału AI");
 
+
+
+            //ai_playerService.inicjalizujPlansze();
+            //ai_playerService.ustawFlote();
+            //LOGGER.info("AI");
+            int AI_atakuje_tutaj=ai_playerService.atakuj();
+            return new ResponseEntity/*<>*/(AI_atakuje_tutaj,HttpStatus.OK);
+        }
+
+        @CrossOrigin
+        @GetMapping(value = "/statki/trafienie_statku_gracza")
+        public ResponseEntity<Pole> odbierzOdpowiedz(int odpowiedz_pole, int odpowiedz_stan){
+            LOGGER.info("### Statek gracza oberwal");
+
+
+
+            //ai_playerService.inicjalizujPlansze();
+            //ai_playerService.ustawFlote();
+            //LOGGER.info("AI");
+            int AI_atakuje_tutaj=ai_playerService.atakuj();
+            return new ResponseEntity/*<>*/(AI_atakuje_tutaj,HttpStatus.OK);
+        }
 
     }
 

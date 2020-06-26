@@ -17,6 +17,9 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     private Plansza planszaAI;
     public int licznik_ataku=0;
     public char kierunek_ataku='0';
+    public List<Integer> dostepne_strzaly = new ArrayList<>();
+    public int ids=0;
+    public int idsTMP=0;
 
     public AI_PlayerServiceImpl() throws Exception {
         inicjalizujPlansze();
@@ -74,13 +77,20 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     @Override
     public void ustawStatek(Statek statek) throws Exception {
         try {
-            int id = ThreadLocalRandom.current().nextInt(1, 101);    // czubek statku
+            //int id = ThreadLocalRandom.current().nextInt(1, 101);    // czubek statku
+            //System.out.println("wylosowane id: " + id);
+            //Pole pole = planszaAI.getListaPol().get(id - 1);
+            Pole pole = planszaAI.getListaPol().get(ThreadLocalRandom.current().nextInt(1, 101) - 1); // czubek statku
+            while(pole.getStan()!=0){
+                pole = planszaAI.getListaPol().get(ThreadLocalRandom.current().nextInt(1, 101) - 1);
+            }
+            int id=pole.getId();
             System.out.println("wylosowane id: " + id);
-            Pole pole = planszaAI.getListaPol().get(id - 1);
             statek.dodajPole(pole);
             pole.setStan(statek.getId());
 
             List<Integer> dostepne = new ArrayList<>();
+            /*
             if (id > 1 && (id - 1) % 10 != 0)
                 dostepne.add(id - 1);   //y    kierunek
             if (id < 100 && id % 10 != 0)
@@ -89,35 +99,38 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 dostepne.add(id - 10);  //x    kierunek
             if (id < 90)
                 dostepne.add(id + 10);  //x    kierunek
+            */
+                dodajKierunki(id,dostepne);
             int tmpID = id;
             //int[] dostepne = {id-1, id+1, id-10, id+10};
             //id = ThreadLocalRandom.current().nextInt(dostepne.length);
-
+            Pole drugie_pole = planszaAI.getListaPol().get(dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size())) - 1);
+            while(drugie_pole.getStan()!=0){
+                drugie_pole = planszaAI.getListaPol().get(dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size())) - 1);
+            }
+            /* stara wersja nieobsługująca walidacji
             id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
             System.out.println("wylosowane id kierunku: " + id);
             Pole drugie_pole = planszaAI.getListaPol().get(id - 1);
+            */
+            id=drugie_pole.getId();
+            System.out.println("wylosowane id kierunku: " + id);
             //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
             if (drugie_pole.getWsp_x() == pole.getWsp_x()) {
                 statek.setKierunek('x');
-                //dostepne.remove(0);
-                //dostepne.remove(0);
                 dostepne.remove(Integer.valueOf(tmpID - 1));
                 dostepne.remove(Integer.valueOf(tmpID + 1));
-                //return pierwsze.getWsp_y() + 1 == drugie_pole.getWsp_y() || pierwsze.getWsp_y() - 1 == drugie_pole.getWsp_y();
             } else if (drugie_pole.getWsp_y() == pole.getWsp_y()) {
                 statek.setKierunek('y');
-                //dostepne.remove(3);
-                //dostepne.remove(2);  // zerowy znika, więc 1 wskakuje na jego miejsce
                 dostepne.remove(Integer.valueOf(tmpID - 10));
                 dostepne.remove(Integer.valueOf(tmpID + 10));
-                //return pierwsze.getWsp_x() + 1 == pole.getWsp_x() || pierwsze.getWsp_x() - 1 == pole.getWsp_x();
             }
             statek.dodajPole(drugie_pole);
             drugie_pole.setStan(statek.getId());
             dostepne.remove(Integer.valueOf(id));
             System.out.println("wylosowany kierunek : " + statek.getKierunek());
             while (statek.getListaPol().size() != statek.getDlugosc()) {
-                //planszaGracza.getListaPol().get(id).getStan()==0      // warunek stanu pola
+                /*
                 if (statek.getKierunek() == 'x') {
                     if (id - 10 < 1)
                         dodaj(id + 10, dostepne);
@@ -144,7 +157,8 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                         dodaj(id - 1, dostepne);
                         dodaj(id + 1, dostepne);
                     }
-                }
+                }*/
+                    dodajZKierunku(statek.getKierunek(),id,dostepne);
                 id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));   //IllegalArgumentException
                 System.out.println("wylosowane kolejne id : " + id);
                 pole = planszaAI.getListaPol().get(id - 1);
@@ -174,7 +188,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     public void dodaj(int id, List<Integer> dostepne){
         if (planszaAI.getListaPol().get(id-1).getStan()==0) dostepne.add(id);
         else{
-            System.out.println("DUPA: " + id);
+            System.out.println("Tu juz jest jakis statek: " + id);
         }
     }
     public void usunStatek(Statek statek, int stan) {
@@ -183,38 +197,79 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         }
     }
 
+    public void dodajKierunki(int id,List<Integer> lista){
+        if (id > 1 && (id - 1) % 10 != 0)
+            //dostepne.add(id - 1);   //y    kierunek
+            dodaj(id-1,lista);
+        if (id < 100 && id % 10 != 0)
+            //dostepne.add(id + 1);   //y    kierunek
+            dodaj(id+1,lista);
+        if (id > 10)
+            //dostepne.add(id - 10);  //x    kierunek
+            dodaj(id-10,lista);
+        if (id < 90)
+            //dostepne.add(id + 10);  //x    kierunek
+            dodaj(id+10,lista);
+    }
+
+    public void dodajZKierunku(char kierunek, int id, List<Integer> lista){
+        if (kierunek == 'x') {
+            if (id - 10 < 1)
+                dodaj(id + 10, lista);
+            else if (id + 10 >= 101)
+                dodaj(id - 10, lista);
+            else {
+                dodaj(id + 10, lista);
+                dodaj(id - 10, lista);
+            }
+        } else if (kierunek == 'y') {
+            if (id == 1 || id == 11 || id == 21 || id == 31 || id == 41 || id == 51 || id == 61 || id == 71 || id == 81 || id == 91)
+                dodaj(id + 1, lista);
+            else if (id == 10 || id == 20 || id == 30 || id == 40 || id == 50 || id == 60 || id == 70 || id == 80 || id == 90 || id == 100)
+                dodaj(id - 1, lista);
+            else {
+                dodaj(id - 1, lista);
+                dodaj(id + 1, lista);
+            }
+        }
+    }
+
     @Override
-    public void atakuj(){
-        int slepak = ThreadLocalRandom.current().nextInt(0, 99 + 1);
-        strzelaj(slepak);
+    public int atakuj(){
+        if (licznik_ataku==0) {
+            int ids = ThreadLocalRandom.current().nextInt(1, 101);
+            idsTMP=ids;
+        }
+        else{
+            if(kierunek_ataku=='0'){ // 2 strzał z kolei
+                dodajKierunki(ids,dostepne_strzaly);
+                ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));   //IllegalArgumentException
+                Pole drugie_pole = planszaAI.getListaPol().get(ids - 1);
+                if (drugie_pole.getWsp_x() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_x()) {
+                    kierunek_ataku='x';
+                    dostepne_strzaly.remove(Integer.valueOf(idsTMP - 1));
+                    dostepne_strzaly.remove(Integer.valueOf(idsTMP + 1));
+                } else if (drugie_pole.getWsp_y() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_y()) {
+                    kierunek_ataku='y';
+                    dostepne_strzaly.remove(Integer.valueOf(idsTMP - 10));
+                    dostepne_strzaly.remove(Integer.valueOf(idsTMP + 10));
+                }
+                dostepne_strzaly.remove(Integer.valueOf(ids));
+            }
+            else{
+                dodajZKierunku(kierunek_ataku,ids,dostepne_strzaly);
+                ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
+            }
+        }
+        return ids;
     }
 
     @Override
     public int strzelaj(int id_pola){
-        int id=0;
-        if (licznik_ataku==0) {   //strzał numer 1
-            id = ThreadLocalRandom.current().nextInt(1, 101);
-            List<Integer> dostepne_strzaly = new ArrayList<>();
-            if (id > 1 && (id - 1) % 10 != 0)
-                dostepne_strzaly.add(id - 1);   //y    kierunek
-            if (id < 100 && id % 10 != 0)
-                dostepne_strzaly.add(id + 1);   //y    kierunek
-            if (id > 10)
-                dostepne_strzaly.add(id - 10);  //x    kierunek
-            if (id < 90)
-                dostepne_strzaly.add(id + 10);  //x    kierunek
-            int tmpID = id;
-        }
-        else{
-            if(kierunek_ataku==0){ //strzał numer dwa
 
-            }
-            else{ //kolejne strzał
 
-            }
-        }
 
-        return id;
+        return 0;
     }
 
     @Override
