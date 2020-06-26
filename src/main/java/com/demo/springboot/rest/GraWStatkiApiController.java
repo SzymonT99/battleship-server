@@ -56,7 +56,7 @@ import java.util.Map;
 
         @CrossOrigin
         @GetMapping(value = "/statki/strzal_AI")
-        public ResponseEntity<Pole> strzalAI(){
+        public ResponseEntity<Integer> strzalAI(){
             LOGGER.info("### Tura strzału AI");
 
 
@@ -65,21 +65,36 @@ import java.util.Map;
             //ai_playerService.ustawFlote();
             //LOGGER.info("AI");
             int AI_atakuje_tutaj=ai_playerService.atakuj();
-            return new ResponseEntity/*<>*/(AI_atakuje_tutaj,HttpStatus.OK);
+            return new ResponseEntity<>(AI_atakuje_tutaj,HttpStatus.OK);
         }
 
         @CrossOrigin
         @GetMapping(value = "/statki/trafienie_statku_gracza")
-        public ResponseEntity<Pole> odbierzOdpowiedz(int odpowiedz_pole, int odpowiedz_stan){
+        public ResponseEntity<Integer> odbierzOdpowiedz(int odpowiedz_pole, int odpowiedz_stan){
             LOGGER.info("### Statek gracza oberwal");
 
+            if(odpowiedz_stan==11){
+                System.out.println("Pudlo");
+                // dalsze instrukcje
+                //turaObrony();
+            }
+            else if(odpowiedz_stan>1 && odpowiedz_stan<6){ // TODO: nie jest dokończone!
+                System.out.println("Trafiono statek!");
+                // dalsze instrukcje
+                // TODO: zapisz id_pola oraz id_trafionego na liście - będzie to służyło do tego, że jak trafi dwa statki koło siebie, to przy zatopieniu 1 statku, będzie szukało tego 2?
+
+            }
+            else if(odpowiedz_stan==99){ // TODO: Nie ma jeszcze dodawania do listy statków wroga - lista jet pusta.
+                System.out.println("Zatopiono statek!");  // ta metoda jest zakończona
+
+            }
 
 
             //ai_playerService.inicjalizujPlansze();
             //ai_playerService.ustawFlote();
             //LOGGER.info("AI");
             int AI_atakuje_tutaj=ai_playerService.atakuj();
-            return new ResponseEntity/*<>*/(AI_atakuje_tutaj,HttpStatus.OK);
+            return new ResponseEntity<>(AI_atakuje_tutaj,HttpStatus.OK);
         }
 
     }

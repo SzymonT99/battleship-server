@@ -13,4 +13,8 @@ public interface AI_PlayerService {
     public void wykryj();
     public void obslugaOdpowiedzi(int odpowiedz_pole, int odpowiedz_stan);
     public Plansza getPlanszaAI();
+    public void setLicznik_ataku(int licznik_ataku);
+    public void setKierunek_ataku(char kierunek_ataku);
+    public void setIds(int ids);
+    public void setIdsTMP(int idsTMP);
 }

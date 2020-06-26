@@ -4,10 +4,8 @@ import com.demo.springboot.Model.Plansza;
 import com.demo.springboot.Model.Pole;
 import com.demo.springboot.Model.Statek;
 import com.demo.springboot.Service.AI_PlayerService;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,11 +13,11 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class AI_PlayerServiceImpl implements AI_PlayerService {
     private Plansza planszaAI;
-    public int licznik_ataku=0;
-    public char kierunek_ataku='0';
     public List<Integer> dostepne_strzaly = new ArrayList<>();
-    public int ids=0;
-    public int idsTMP=0;
+    private int licznik_ataku=0;
+    private char kierunek_ataku='0';
+    private int ids=0;
+    private int idsTMP=0;
 
     public AI_PlayerServiceImpl() throws Exception {
         inicjalizujPlansze();
@@ -100,7 +98,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
             if (id < 90)
                 dostepne.add(id + 10);  //x    kierunek
             */
-                dodajKierunki(id,dostepne);
+                dodajKierunki(id,dostepne,"ustaw");
             int tmpID = id;
             //int[] dostepne = {id-1, id+1, id-10, id+10};
             //id = ThreadLocalRandom.current().nextInt(dostepne.length);
@@ -158,7 +156,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                         dodaj(id + 1, dostepne);
                     }
                 }*/
-                    dodajZKierunku(statek.getKierunek(),id,dostepne);
+                    dodajZKierunku(statek.getKierunek(),id,dostepne,"ustaw");
                 id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));   //IllegalArgumentException
                 System.out.println("wylosowane kolejne id : " + id);
                 pole = planszaAI.getListaPol().get(id - 1);
@@ -185,10 +183,16 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         }
     }
 
-    public void dodaj(int id, List<Integer> dostepne){
-        if (planszaAI.getListaPol().get(id-1).getStan()==0) dostepne.add(id);
+    public void dodaj(int id, List<Integer> dostepne, String operacja){
+        if(operacja=="ustaw") {
+            if (planszaAI.getListaPol().get(id - 1).getStan() == 0)
+                dostepne.add(id); //przy strzelaniu tutaj musi być warunek stan>0 && stan<6 !!!!!!
+            else {
+                System.out.println("Tu juz jest jakis statek: " + id);
+            }
+        }
         else{
-            System.out.println("Tu juz jest jakis statek: " + id);
+            if (planszaAI.getListaPol().get(id - 1).getStan() >0 && planszaAI.getListaPol().get(id - 1).getStan() <6) dostepne.add(id);
         }
     }
     public void usunStatek(Statek statek, int stan) {
@@ -197,39 +201,39 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         }
     }
 
-    public void dodajKierunki(int id,List<Integer> lista){
+    public void dodajKierunki(int id,List<Integer> lista, String operacja){
         if (id > 1 && (id - 1) % 10 != 0)
             //dostepne.add(id - 1);   //y    kierunek
-            dodaj(id-1,lista);
+            dodaj(id-1,lista,operacja);
         if (id < 100 && id % 10 != 0)
             //dostepne.add(id + 1);   //y    kierunek
-            dodaj(id+1,lista);
+            dodaj(id+1,lista,operacja);
         if (id > 10)
             //dostepne.add(id - 10);  //x    kierunek
-            dodaj(id-10,lista);
+            dodaj(id-10,lista,operacja);
         if (id < 90)
             //dostepne.add(id + 10);  //x    kierunek
-            dodaj(id+10,lista);
+            dodaj(id+10,lista,operacja);
     }
 
-    public void dodajZKierunku(char kierunek, int id, List<Integer> lista){
+    public void dodajZKierunku(char kierunek, int id, List<Integer> lista, String operacja){
         if (kierunek == 'x') {
             if (id - 10 < 1)
-                dodaj(id + 10, lista);
+                dodaj(id + 10, lista,operacja);
             else if (id + 10 >= 101)
-                dodaj(id - 10, lista);
+                dodaj(id - 10, lista,operacja);
             else {
-                dodaj(id + 10, lista);
-                dodaj(id - 10, lista);
+                dodaj(id + 10, lista,operacja);
+                dodaj(id - 10, lista,operacja);
             }
         } else if (kierunek == 'y') {
             if (id == 1 || id == 11 || id == 21 || id == 31 || id == 41 || id == 51 || id == 61 || id == 71 || id == 81 || id == 91)
-                dodaj(id + 1, lista);
+                dodaj(id + 1, lista,operacja);
             else if (id == 10 || id == 20 || id == 30 || id == 40 || id == 50 || id == 60 || id == 70 || id == 80 || id == 90 || id == 100)
-                dodaj(id - 1, lista);
+                dodaj(id - 1, lista,operacja);
             else {
-                dodaj(id - 1, lista);
-                dodaj(id + 1, lista);
+                dodaj(id - 1, lista,operacja);
+                dodaj(id + 1, lista,operacja);
             }
         }
     }
@@ -238,29 +242,31 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     public int atakuj(){
         if (licznik_ataku==0) {
             int ids = ThreadLocalRandom.current().nextInt(1, 101);
-            idsTMP=ids;
+            setIdsTMP(ids);
+
         }
         else{
             if(kierunek_ataku=='0'){ // 2 strzał z kolei
-                dodajKierunki(ids,dostepne_strzaly);
-                ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));   //IllegalArgumentException
+                    dodajKierunki(ids,dostepne_strzaly,"atakuj");
+                setIds(dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())));   //IllegalArgumentException
                 Pole drugie_pole = planszaAI.getListaPol().get(ids - 1);
                 if (drugie_pole.getWsp_x() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_x()) {
-                    kierunek_ataku='x';
+                    setKierunek_ataku('x');
                     dostepne_strzaly.remove(Integer.valueOf(idsTMP - 1));
                     dostepne_strzaly.remove(Integer.valueOf(idsTMP + 1));
                 } else if (drugie_pole.getWsp_y() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_y()) {
-                    kierunek_ataku='y';
+                    setKierunek_ataku('y');
                     dostepne_strzaly.remove(Integer.valueOf(idsTMP - 10));
                     dostepne_strzaly.remove(Integer.valueOf(idsTMP + 10));
                 }
                 dostepne_strzaly.remove(Integer.valueOf(ids));
             }
             else{
-                dodajZKierunku(kierunek_ataku,ids,dostepne_strzaly);
-                ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
+                    dodajZKierunku(kierunek_ataku,ids,dostepne_strzaly,"atakuj");
+                setIds(dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())));
             }
         }
+        licznik_ataku=+1;
         return ids;
     }
 
@@ -313,5 +319,21 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     @Override
     public Plansza getPlanszaAI(){
         return planszaAI;
+    }
+    @Override
+    public void setLicznik_ataku(int licznik_ataku) {
+        this.licznik_ataku = licznik_ataku;
+    }
+    @Override
+    public void setKierunek_ataku(char kierunek_ataku) {
+        this.kierunek_ataku = kierunek_ataku;
+    }
+    @Override
+    public void setIds(int ids) {
+        this.ids = ids;
+    }
+    @Override
+    public void setIdsTMP(int idsTMP) {
+        this.idsTMP = idsTMP;
     }
 }
