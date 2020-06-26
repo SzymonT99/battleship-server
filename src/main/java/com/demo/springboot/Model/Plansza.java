@@ -6,6 +6,7 @@ public class Plansza {
     private Boolean turaWalki;
     private Integer liczbaStrzalow;
     private ArrayList<Pole> listaPol = new ArrayList<>();
+    public ArrayList<Statek> listaStatkowAI = new ArrayList<>();
 
     public Plansza() {
     }
@@ -35,5 +36,11 @@ public class Plansza {
         this.liczbaStrzalow = liczbaStrzalow;
     }
 
+    public ArrayList<Statek> getListaStatkowAI() {
+        return listaStatkowAI;
+    }
 
+    public void dodajStatek(Statek statek) {
+        listaStatkowAI.add(statek);
+    }
 }

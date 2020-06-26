@@ -1,5 +1,6 @@
 package com.demo.springboot.rest;
 
+import com.demo.springboot.Model.Pole;
 import com.demo.springboot.Service.AI_PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +34,25 @@ import java.util.Map;
         private AI_PlayerService ai_playerService;
         @CrossOrigin
         @GetMapping(value = "/statki/strzelaj/{id_pola}")
-        public ResponseEntity<Void> odbierzStrzal(@PathVariable ("id_pola") int id_pola) throws Exception {
+        public ResponseEntity<Pole> odbierzStrzal(@PathVariable ("id_pola") int id_pola) throws Exception {
             LOGGER.info("### Serwer otrzymał id pola: {}", id_pola);
 
 
 
-            ai_playerService.inicjalizujPlansze();
-            ai_playerService.ustawFlote();
-            LOGGER.info("AI");
-
-            return new ResponseEntity<>(HttpStatus.OK);
+            //ai_playerService.inicjalizujPlansze();
+            //ai_playerService.ustawFlote();
+            //LOGGER.info("AI");
+            Pole poleAI=ai_playerService.getPlanszaAI().getListaPol().get(id_pola-1);
+            return new ResponseEntity<>(poleAI,HttpStatus.OK);
         }
+        @CrossOrigin
+        @GetMapping(value = "/statki/obrona")
+        public ResponseEntity<String> wykonajStrzal(){
+            LOGGER.info("### Serwer otrzymał zadanie strzalu AI");
+            String id = "10";
 
+            return new ResponseEntity<>(id, HttpStatus.OK);
+        }
 
 
 

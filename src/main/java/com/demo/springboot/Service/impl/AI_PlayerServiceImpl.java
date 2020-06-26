@@ -4,6 +4,7 @@ import com.demo.springboot.Model.Plansza;
 import com.demo.springboot.Model.Pole;
 import com.demo.springboot.Model.Statek;
 import com.demo.springboot.Service.AI_PlayerService;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.stereotype.Service;
 
 import javax.swing.*;
@@ -13,9 +14,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AI_PlayerServiceImpl implements AI_PlayerService {
-    private Plansza planszaGracza;
+    private Plansza planszaAI;
+    public int licznik_ataku=0;
+    public char kierunek_ataku='0';
+
+    public AI_PlayerServiceImpl() throws Exception {
+        inicjalizujPlansze();
+        ustawFlote();
+    }
     @Override
     public void inicjalizujPlansze(){
+        System.out.println("Inicjalizacja planszy");
         ArrayList<Pole> polaPlanszy = new ArrayList<>();
         int i = 0;
         for (int z=0;z<100;z++) {
@@ -30,27 +39,34 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
             i++;
             //System.out.println("id: " + polaPlanszy.get(i - 1).getId() + " x: " + polaPlanszy.get(i - 1).getWsp_x() + " y: " + polaPlanszy.get(i - 1).getWsp_y());
         }
-        planszaGracza = new Plansza(polaPlanszy);
+        this.planszaAI = new Plansza(polaPlanszy);
     }
 
     @Override
     public void ustawFlote() throws Exception {
-        Plansza planszaAI;
         Statek statek2 = new Statek(1, 2);
         Statek statek3_1 = new Statek(2, 3);
         Statek statek3_2 = new Statek(3, 3);
         Statek statek4 = new Statek(4, 4);
         Statek statek5 = new Statek(5, 5);
+
+
+
         // zmieniłem kolejność na odwrotną, mniejsza szansa wyjątku, to mniej obliczneń.
         System.out.println("Ustawiam statek 5");
         ustawStatek(statek5);
+            planszaAI.dodajStatek(statek5);
         System.out.println("Ustawiam statek 4");
+            planszaAI.dodajStatek(statek4);
         ustawStatek(statek4);
         System.out.println("Ustawiam statek 3-1");
+            planszaAI.dodajStatek(statek3_1);
         ustawStatek(statek3_1);
         System.out.println("Ustawiam statek 3-2");
+            planszaAI.dodajStatek(statek3_2);
         ustawStatek(statek3_2);    // pomyślimy, czy to jakoś usprawnić? średnio to wygląda
         System.out.println("Ustawiam statek 2");
+            planszaAI.dodajStatek(statek2);
         ustawStatek(statek2);
         // oczekuj na dalsze rozkazy - walka itd.
     }
@@ -60,7 +76,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         try {
             int id = ThreadLocalRandom.current().nextInt(1, 101);    // czubek statku
             System.out.println("wylosowane id: " + id);
-            Pole pole = planszaGracza.getListaPol().get(id - 1);
+            Pole pole = planszaAI.getListaPol().get(id - 1);
             statek.dodajPole(pole);
             pole.setStan(statek.getId());
 
@@ -79,7 +95,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
 
             id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));
             System.out.println("wylosowane id kierunku: " + id);
-            Pole drugie_pole = planszaGracza.getListaPol().get(id - 1);
+            Pole drugie_pole = planszaAI.getListaPol().get(id - 1);
             //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
             if (drugie_pole.getWsp_x() == pole.getWsp_x()) {
                 statek.setKierunek('x');
@@ -131,7 +147,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 }
                 id = dostepne.get(ThreadLocalRandom.current().nextInt(dostepne.size()));   //IllegalArgumentException
                 System.out.println("wylosowane kolejne id : " + id);
-                pole = planszaGracza.getListaPol().get(id - 1);
+                pole = planszaAI.getListaPol().get(id - 1);
                 if (pole.getStan() == 0) {
                     statek.dodajPole(pole);
                     pole.setStan(statek.getId());
@@ -142,7 +158,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
             // wypisuję pola statku dla sprawdzenia
         }
         catch (Exception e){
-            usunStatek(statek);
+            usunStatek(statek,0);
             statek.getListaPol().clear();
             System.out.println("Statek ma usterke - reset. --------------------------------------------------------------------------------------------------");
             ustawStatek(statek);
@@ -156,15 +172,14 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     }
 
     public void dodaj(int id, List<Integer> dostepne){
-        if (planszaGracza.getListaPol().get(id-1).getStan()==0) dostepne.add(id);
+        if (planszaAI.getListaPol().get(id-1).getStan()==0) dostepne.add(id);
         else{
             System.out.println("DUPA: " + id);
         }
     }
-    public void usunStatek(Statek statek) {
-        ArrayList<Pole> usuwanieStatku = statek.getListaPol();
+    public void usunStatek(Statek statek, int stan) {
         for (Pole pole : statek.getListaPol()) {
-            planszaGracza.getListaPol().get(pole.getId() - 1).setStan(0);
+            planszaAI.getListaPol().get(pole.getId() - 1).setStan(stan);
         }
     }
 
@@ -176,7 +191,30 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
 
     @Override
     public int strzelaj(int id_pola){
-        return 0;
+        int id=0;
+        if (licznik_ataku==0) {   //strzał numer 1
+            id = ThreadLocalRandom.current().nextInt(1, 101);
+            List<Integer> dostepne_strzaly = new ArrayList<>();
+            if (id > 1 && (id - 1) % 10 != 0)
+                dostepne_strzaly.add(id - 1);   //y    kierunek
+            if (id < 100 && id % 10 != 0)
+                dostepne_strzaly.add(id + 1);   //y    kierunek
+            if (id > 10)
+                dostepne_strzaly.add(id - 10);  //x    kierunek
+            if (id < 90)
+                dostepne_strzaly.add(id + 10);  //x    kierunek
+            int tmpID = id;
+        }
+        else{
+            if(kierunek_ataku==0){ //strzał numer dwa
+
+            }
+            else{ //kolejne strzał
+
+            }
+        }
+
+        return id;
     }
 
     @Override
@@ -187,5 +225,38 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     @Override
     public void wykryj(){
 
+    }
+    @Override
+    public void obslugaOdpowiedzi(int odpowiedz_pole, int odpowiedz_stan){  // TODO: nie jest dokończone!
+        if(odpowiedz_stan==11){
+            System.out.println("Pudlo");
+            // dalsze instrukcje
+            //turaObrony();
+        }
+        else if(odpowiedz_stan>1 && odpowiedz_stan<6){ // TODO: nie jest dokończone!
+            System.out.println("Trafiono statek!");
+            // dalsze instrukcje
+            // TODO: zapisz id_pola oraz id_trafionego na liście - będzie to służyło do tego, że jak trafi dwa statki koło siebie, to przy zatopieniu 1 statku, będzie szukało tego 2?
+            // ale to bym zostawił na potem, jeśli starczy czasu, bo to już jest ulepszanie siły AI.
+
+        }
+        // TODO: PONIŻSZY KOD JEST DO ZMIANY
+        /*else if(odpowiedz_stan==99){ // TODO: Nie ma jeszcze dodawania do listy statków wroga - lista jet pusta.
+            System.out.println("Zatopiono statek!");  // ta metoda jest zakończona
+            Statek z_statek=listaStatkowWroga.get(odpowiedz_stan);
+            usunStatek(z_statek,99);
+                //z_statek.getListaPol().clear();
+                //listaStatkow.remove(odpowiedz_stan-1);   //id statku są w przedziale 1-5, a lista jest iterowana od 0
+                // TODO: narazie czyszczenie listy pól w zatopionym statku jest zakomentowane, bo testy są w jednej metodzie i po zatopieniu powstawałby nowy statek
+        }*/
+        else if(odpowiedz_stan==99){ // TODO: Nie ma jeszcze dodawania do listy statków wroga - lista jet pusta.
+            System.out.println("Zatopiono statek!");  // ta metoda jest zakończona
+
+        }
+    }
+
+    @Override
+    public Plansza getPlanszaAI(){
+        return planszaAI;
     }
 }
