@@ -105,8 +105,9 @@ public class GraWStatkiApiController {
                     ai_playerService.usunStrzal(ai_playerService.getPole().getId()+10);
                 }
             }
-            if(ai_playerService.getLicznik_ataku()>=3){
+            if(ai_playerService.getLicznik_ataku()>1){
                 ai_playerService.dodajZKierunku(ai_playerService.getKierunek_ataku(), poleGracza.getId(), ai_playerService.getDostepneStrzaly(), "atakuj");
+                System.out.println("HALO, SLYSZY MNIE KTO?????????????????????????????????????");
             }
             if(ai_playerService.getTrafione_id()[poleGracza.getStan()-1]==ai_playerService.getPlanszaAI().getListaStatkowAI().get(poleGracza.getStan()-1).getDlugosc()){ //działa
                 System.out.println("Zatopiono statek! ");

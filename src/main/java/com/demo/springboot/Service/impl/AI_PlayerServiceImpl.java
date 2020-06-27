@@ -150,30 +150,55 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     }
     @Override
     public void dodajKierunki(int id,List<Integer> lista, String operacja){
-        if (id > 1 && (id - 1) % 10 != 0) dodaj(id-1,lista,operacja);       //y    kierunek
-        if (id < 100 && id % 10 != 0) dodaj(id+1,lista,operacja);           //y    kierunek
-        if (id > 10) dodaj(id-10,lista,operacja);                           //x    kierunek
-        if (id < 90) dodaj(id+10,lista,operacja);                           //x    kierunek
+        if (id > 1 && (id - 1) % 10 != 0) {
+            dodaj(id-1,lista,operacja);       //y    kierunek
+            System.out.println("Kierunki lewy id:" + (id-1));
+        }
+        if (id < 100 && id % 10 != 0) {
+            dodaj(id+1,lista,operacja);           //y    kierunek
+            System.out.println("Kierunki prawy id:" + (id+1));
+        }
+        if (id > 10) {
+            dodaj(id-10,lista,operacja);                           //x    kierunek
+            System.out.println("Kierunek dolny id:" + (id-10));
+        }
+        if (id < 90) {
+            dodaj(id+10,lista,operacja);                           //x    kierunek
+            System.out.println("Kierunek gorny id:" + (id+10));
+        }
     }
     @Override
     public void dodajZKierunku(char kierunek, int id, List<Integer> lista, String operacja){
+        System.out.println("UWAGA, Sprawdzam kierunek... przeslane id pola to: " + id);
         if (kierunek == 'x') {
-            if (id - 10 < 1)
-                dodaj(id + 10, lista,operacja);
-            else if (id + 10 >= 101)
-                dodaj(id - 10, lista,operacja);
+            System.out.println("UWAGA,kierunek to X");
+            if (id - 10 < 1) {
+                dodaj(id + 10, lista, operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id+10));
+            }
+            else if (id + 10 >= 101) {
+                dodaj(id - 10, lista, operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id-10));
+            }
             else {
                 dodaj(id + 10, lista,operacja);
                 dodaj(id - 10, lista,operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id+10) + "oraz: " + (id-10));
             }
         } else if (kierunek == 'y') {
-            if (id == 1 || id == 11 || id == 21 || id == 31 || id == 41 || id == 51 || id == 61 || id == 71 || id == 81 || id == 91)
-                dodaj(id + 1, lista,operacja);
-            else if (id == 10 || id == 20 || id == 30 || id == 40 || id == 50 || id == 60 || id == 70 || id == 80 || id == 90 || id == 100)
-                dodaj(id - 1, lista,operacja);
+            System.out.println("UWAGA,kierunek to Y");
+            if (id == 1 || id == 11 || id == 21 || id == 31 || id == 41 || id == 51 || id == 61 || id == 71 || id == 81 || id == 91) {
+                dodaj(id + 1, lista, operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id+1));
+            }
+            else if (id == 10 || id == 20 || id == 30 || id == 40 || id == 50 || id == 60 || id == 70 || id == 80 || id == 90 || id == 100) {
+                dodaj(id - 1, lista, operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id - 10));
+            }
             else {
                 dodaj(id - 1, lista,operacja);
                 dodaj(id + 1, lista,operacja);
+                System.out.println("Dodaje kierunkowy id:" + (id+1) + "oraz: " + (id-1));
             }
         }
     }
@@ -206,8 +231,11 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 dostepne_strzaly.remove(Integer.valueOf(ids));
             }
             licznik_ataku+=1;
+            System.out.println("AKTUALNY LICZNIK TO: " + licznik_ataku);
         }catch(Exception e) {
             // pobierz otoczenie ostatnich trafień
+
+            /* ten switch nie działa
             switch(kierunek_ataku) { // odwróć kierunek strzału
                 case 'x':
                     setKierunek_ataku('y');
@@ -217,12 +245,19 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                     break;
                 default:
                     setKierunek_ataku('0');
+            }*/
+            if(kierunek_ataku=='x') kierunek_ataku='y';
+            else{
+                if(kierunek_ataku=='y') kierunek_ataku='x';
+                else kierunek_ataku='0';
             }
-            ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
+
+            ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())); // to się teraz może wywalić, bo nie dodaję otoczenia po pustej liście.
             System.out.println("PUSTA LISTA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         }
         while(oddane_strzaly.contains(ids)){
-            ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
+            if(dostepne_strzaly.isEmpty()) ids = ThreadLocalRandom.current().nextInt(1, 101);
+            else ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())); //może się wywalić na zerowej liście, skoro się nic w niej nie ustawiło bez trafienia
         }
 
         oddane_strzaly.add(Integer.valueOf(ids));
