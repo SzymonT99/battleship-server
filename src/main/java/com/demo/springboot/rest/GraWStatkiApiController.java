@@ -57,7 +57,7 @@ public class GraWStatkiApiController {
         int AI_atakuje_tutaj = ai_playerService.atakuj();     //przeniesione - ok ok :D
         ai_playerService.usunStrzal(AI_atakuje_tutaj);
         String id = String.valueOf(AI_atakuje_tutaj);
-        //String id = "10";
+        //String id = "10";      //dodanie do listy oddanych strzałów następuje wcześniej
         System.out.println(id + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
         return new ResponseEntity<>(id, HttpStatus.OK);
     }

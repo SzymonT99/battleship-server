@@ -205,7 +205,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 }
                 dostepne_strzaly.remove(Integer.valueOf(ids));
             }
-            setLicznik_ataku(licznik_ataku + 1);
+            licznik_ataku+=1;
         }catch(Exception e) {
             // pobierz otoczenie ostatnich trafień
             switch(kierunek_ataku) { // odwróć kierunek strzału
@@ -218,7 +218,11 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 default:
                     setKierunek_ataku('0');
             }
+            ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
             System.out.println("PUSTA LISTA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        }
+        while(oddane_strzaly.contains(ids)){
+            ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
         }
 
         oddane_strzaly.add(Integer.valueOf(ids));
