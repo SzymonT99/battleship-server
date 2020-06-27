@@ -41,10 +41,8 @@ public class GraWStatkiApiController {
     public ResponseEntity<Pole> odbierzStrzal(@PathVariable("id_pola") int id_pola) throws Exception {
         LOGGER.info("### Serwer otrzymał id pola: {}", id_pola);
 
-        //ai_playerService.inicjalizujPlansze();
-        //ai_playerService.ustawFlote();
-        //LOGGER.info("AI");
         Pole poleAI = ai_playerService.getPlanszaAI().getListaPol().get(id_pola - 1);
+        //if(poleAI.getStan()>0 && poleAI.getStan()<6) poleAI.setStan(11);   narazie, to działa w wypadku kliknięcia na wrogi statek i ustawia 11 i gra nie zalicza trafienia, tylko pudło
         return new ResponseEntity<>(poleAI, HttpStatus.OK);
     }
 
@@ -74,9 +72,10 @@ public class GraWStatkiApiController {
         if (poleGracza.getStan() == 0) {
             System.out.println("Pudlo");
             System.out.println("licznik ataku: " + ai_playerService.getLicznik_ataku());
-            if(ai_playerService.getLicznik_ataku()==1) {
-                ai_playerService.setLicznik_ataku(0);
-                ai_playerService.getDostepneStrzaly().clear();
+            //if(ai_playerService.getLicznik_ataku()==1) {
+            if(ai_playerService.getLicznik_ataku()==0) {
+            //    ai_playerService.setLicznik_ataku(0);
+            //    ai_playerService.getDostepneStrzaly().clear();
                 System.out.println("PUDLO TOTALNE - RESETUJE LICZNIK!!!");
             }
 
@@ -84,6 +83,7 @@ public class GraWStatkiApiController {
 
         } else if (poleGracza.getStan() > 0 && poleGracza.getStan() < 6) {
             System.out.println("Trafiono statek!");
+            ai_playerService.setLicznik_ataku(ai_playerService.getLicznik_ataku()+1);
             if(ai_playerService.getLicznik_ataku()==1) {
                 ai_playerService.setPole(poleGracza);
                 //dodajKierunki();

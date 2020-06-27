@@ -6,6 +6,7 @@ import com.demo.springboot.Model.Statek;
 import com.demo.springboot.Service.AI_PlayerService;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -210,7 +211,8 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 ids = ThreadLocalRandom.current().nextInt(1, 101);
                 idsTMP=ids;
             } else {
-                if (licznik_ataku==2) { // 2 strzał z kolei
+                //if (licznik_ataku==2) { // 2 strzał z kolei
+                if (licznik_ataku==1) { // 2 strzał z kolei
                     //dodajKierunki(ids, dostepne_strzaly, "atakuj");
                     ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));   //IllegalArgumentException
                     /*Pole drugie_pole = planszaAI.getListaPol().get(ids - 1);
@@ -230,27 +232,16 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 }
                 dostepne_strzaly.remove(Integer.valueOf(ids));
             }
-            licznik_ataku+=1;
+            //licznik_ataku+=1;
             System.out.println("AKTUALNY LICZNIK TO: " + licznik_ataku);
         }catch(Exception e) {
-            // pobierz otoczenie ostatnich trafień
-
-            /* ten switch nie działa
-            switch(kierunek_ataku) { // odwróć kierunek strzału
-                case 'x':
-                    setKierunek_ataku('y');
-                    break;
-                case 'y':
-                    setKierunek_ataku('x');
-                    break;
-                default:
-                    setKierunek_ataku('0');
-            }*/
-            if(kierunek_ataku=='x') kierunek_ataku='y';
+            if(kierunek_ataku=='x') kierunek_ataku='y';    //zamiana kierunku na przeciwny
             else{
                 if(kierunek_ataku=='y') kierunek_ataku='x';
                 else kierunek_ataku='0';
             }
+            for (Integer p : oddane_strzaly) dodajZKierunku(kierunek_ataku,p,dostepne_strzaly,"atakuj");
+            // pobierz otoczenie ostatnich trafień
 
             ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())); // to się teraz może wywalić, bo nie dodaję otoczenia po pustej liście.
             System.out.println("PUSTA LISTA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
