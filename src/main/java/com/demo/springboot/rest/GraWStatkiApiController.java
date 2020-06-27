@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @RequestMapping("/api")
@@ -50,12 +51,14 @@ public class GraWStatkiApiController {
     // serwer wysyła id_pola na ktore strzela do klienta
     @CrossOrigin
     @GetMapping(value = "/statki/obrona")
-    public ResponseEntity<String> wykonajStrzal() {
+    public ResponseEntity<String> wykonajStrzal() throws Exception {
         LOGGER.info("### Serwer otrzymał żądanie strzału AI");
 
-        int AI_atakuje_tutaj = ai_playerService.atakuj();     //przeniesione
+        int AI_atakuje_tutaj = ai_playerService.atakuj();     //przeniesione - ok ok :D
+        ai_playerService.usunStrzal(AI_atakuje_tutaj);
         String id = String.valueOf(AI_atakuje_tutaj);
-
+        //String id = "10";
+        System.out.println(id + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
         return new ResponseEntity<>(id, HttpStatus.OK);
     }
 
@@ -68,19 +71,53 @@ public class GraWStatkiApiController {
         LOGGER.info("### Id pola gracza: {}", poleGracza.getId());
         LOGGER.info("### Stan pola gracza: {}", poleGracza.getStan());
 
-//        if (odpowiedz_stan == 11) {
-//            System.out.println("Pudlo");
-//            // dalsze instrukcje
-//            //turaObrony();
-//        } else if (odpowiedz_stan > 1 && odpowiedz_stan < 6) { // TODO: nie jest dokończone!
-//            System.out.println("Trafiono statek!");
-//            // dalsze instrukcje
-//            // TODO: zapisz id_pola oraz id_trafionego na liście - będzie to służyło do tego, że jak trafi dwa statki koło siebie, to przy zatopieniu 1 statku, będzie szukało tego 2?
-//
-//        } else if (odpowiedz_stan == 99) { // TODO: Nie ma jeszcze dodawania do listy statków wroga - lista jet pusta.
-//            System.out.println("Zatopiono statek!");  // ta metoda jest zakończona
-//
-//        }
+        if (poleGracza.getStan() == 0) {
+            System.out.println("Pudlo");
+            System.out.println("licznik ataku: " + ai_playerService.getLicznik_ataku());
+            if(ai_playerService.getLicznik_ataku()==1) {
+                ai_playerService.setLicznik_ataku(0);
+                ai_playerService.getDostepneStrzaly().clear();
+                System.out.println("PUDLO TOTALNE - RESETUJE LICZNIK!!!");
+            }
+
+            //turaObrony();
+
+        } else if (poleGracza.getStan() > 0 && poleGracza.getStan() < 6) {
+            System.out.println("Trafiono statek!");
+            if(ai_playerService.getLicznik_ataku()==1) {
+                ai_playerService.setPole(poleGracza);
+                //dodajKierunki();
+                ai_playerService.dodajKierunki(poleGracza.getId(), ai_playerService.getDostepneStrzaly(), "atakuj");
+            }
+            ai_playerService.liczTrafienia(poleGracza.getStan());
+            System.out.println("licznik " + ai_playerService.getTrafione_id()[poleGracza.getStan()-1]); //działa
+            System.out.println("id statku: " + poleGracza.getStan() + " jego dlugosc: " + ai_playerService.getPlanszaAI().getListaStatkowAI().get(poleGracza.getStan()-1).getDlugosc()); //działa
+            if(ai_playerService.getLicznik_ataku()==2) { //ustawiam kierunek
+                if (poleGracza.getWsp_x() == ai_playerService.getPole().getWsp_x()) {
+                    ai_playerService.setKierunek_ataku('x');
+                    System.out.println("Ustawiam kierunek ataku: " + ai_playerService.getKierunek_ataku());
+                    ai_playerService.usunStrzal(ai_playerService.getPole().getId()-1);
+                    ai_playerService.usunStrzal(ai_playerService.getPole().getId()+1);
+                } else if (poleGracza.getWsp_y() == ai_playerService.getPole().getWsp_y()) {
+                    ai_playerService.setKierunek_ataku('y');
+                    System.out.println("Ustawiam kierunek ataku: " + ai_playerService.getKierunek_ataku());
+                    ai_playerService.usunStrzal(ai_playerService.getPole().getId()-10);
+                    ai_playerService.usunStrzal(ai_playerService.getPole().getId()+10);
+                }
+            }
+            if(ai_playerService.getLicznik_ataku()>=3){
+                ai_playerService.dodajZKierunku(ai_playerService.getKierunek_ataku(), poleGracza.getId(), ai_playerService.getDostepneStrzaly(), "atakuj");
+            }
+            if(ai_playerService.getTrafione_id()[poleGracza.getStan()-1]==ai_playerService.getPlanszaAI().getListaStatkowAI().get(poleGracza.getStan()-1).getDlugosc()){ //działa
+                System.out.println("Zatopiono statek! ");
+                ai_playerService.setLicznik_ataku(0);
+                ai_playerService.setKierunek_ataku('0');
+                ai_playerService.czyscDostepneStrzaly();
+                System.out.println(ai_playerService.getLicznik_ataku() + ai_playerService.getKierunek_ataku());
+            }
+            // nie wiem, czy AI potrzebuje cokolwiek robić z tą informacją? Wszystko chyba obsługuję w metodzie atakuj.
+            // dodawanie trafionych pól, żeby w razie pustej listy móc dodać otoczenie.
+        }
 
         //int AI_atakuje_tutaj = ai_playerService.atakuj();
         return new ResponseEntity<>(HttpStatus.CREATED);
