@@ -82,6 +82,7 @@ public class GraWStatkiApiController {
             //turaObrony();
 
         } else if (poleGracza.getStan() > 0 && poleGracza.getStan() < 6) {
+            ai_playerService.getWyjatkowe_strzaly().add(poleGracza.getId());
             System.out.println("Trafiono statek!");
             ai_playerService.setLicznik_ataku(ai_playerService.getLicznik_ataku()+1);
             if(ai_playerService.getLicznik_ataku()==1) {

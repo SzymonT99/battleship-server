@@ -17,7 +17,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     public List<Integer> dostepne_strzaly = new ArrayList<>();
     public List<Integer> oddane_strzaly = new ArrayList<>();
     private int[] trafione_id = {0, 0, 0, 0, 0};
-    public List<Integer> wyjatkowe_strzaly = new ArrayList<>();
+    private List<Integer> wyjatkowe_strzaly = new ArrayList<>();
     private int licznik_ataku=0;
     private char kierunek_ataku='0';
     private int ids=0;
@@ -240,7 +240,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 if(kierunek_ataku=='y') kierunek_ataku='x';
                 else kierunek_ataku='0';
             }
-            for (Integer p : oddane_strzaly) dodajZKierunku(kierunek_ataku,p,dostepne_strzaly,"atakuj");
+            for (Integer p : wyjatkowe_strzaly) dodajZKierunku(kierunek_ataku,p,dostepne_strzaly,"atakuj");
             // pobierz otoczenie ostatnich trafień
 
             ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())); // to się teraz może wywalić, bo nie dodaję otoczenia po pustej liście.
@@ -303,5 +303,9 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     @Override
     public List<Integer> getDostepneStrzaly() {
         return dostepne_strzaly;
+    }
+    @Override
+    public List<Integer> getWyjatkowe_strzaly() {
+        return wyjatkowe_strzaly;
     }
 }

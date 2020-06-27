@@ -25,4 +25,5 @@ public interface AI_PlayerService {
     public void dodajKierunki(int id, List<Integer> lista, String operacja);
     public List<Integer> getDostepneStrzaly();
     public void dodajZKierunku(char kierunek, int id, List<Integer> lista, String operacja);
+    public List<Integer> getWyjatkowe_strzaly();
 }
