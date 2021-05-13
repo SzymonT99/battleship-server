@@ -42,22 +42,21 @@ public class GraWStatkiApiController {
         LOGGER.info("### Serwer otrzymał id pola: {}", id_pola);
 
         Pole poleAI = ai_playerService.getPlanszaAI().getListaPol().get(id_pola - 1);
-        //if(poleAI.getStan()>0 && poleAI.getStan()<6) poleAI.setStan(11);   narazie, to działa w wypadku kliknięcia na wrogi statek i ustawia 11 i gra nie zalicza trafienia, tylko pudło
         return new ResponseEntity<>(poleAI, HttpStatus.OK);
     }
 
     // serwer wysyła id_pola na ktore strzela do klienta
     @CrossOrigin
     @GetMapping(value = "/statki/obrona")
-    public ResponseEntity<String> wykonajStrzal() throws Exception {
+    public ResponseEntity<Pole> wykonajStrzal() throws Exception {
         LOGGER.info("### Serwer otrzymał żądanie strzału AI");
 
-        int AI_atakuje_tutaj = ai_playerService.atakuj();     //przeniesione - ok ok :D
+        int AI_atakuje_tutaj = ai_playerService.atakuj();
         ai_playerService.usunStrzal(AI_atakuje_tutaj);
-        String id = String.valueOf(AI_atakuje_tutaj);
-        //String id = "10";      //dodanie do listy oddanych strzałów następuje wcześniej
-        System.out.println(id + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-        return new ResponseEntity<>(id, HttpStatus.OK);
+
+        Pole pomPole = new Pole(AI_atakuje_tutaj, 0);
+                                                                //dodanie do listy oddanych strzałów następuje wcześniej
+        return new ResponseEntity<>(pomPole, HttpStatus.OK);
     }
 
     // Klient wysyła metodą POST pole na które serwer(AI/przeciwnik) oddał strzał - wysłanie id w powyższym kontrollerze
@@ -72,14 +71,12 @@ public class GraWStatkiApiController {
         if (poleGracza.getStan() == 0) {
             System.out.println("Pudlo");
             System.out.println("licznik ataku: " + ai_playerService.getLicznik_ataku());
-            //if(ai_playerService.getLicznik_ataku()==1) {
+
             if(ai_playerService.getLicznik_ataku()==0) {
-            //    ai_playerService.setLicznik_ataku(0);
-            //    ai_playerService.getDostepneStrzaly().clear();
+
                 System.out.println("PUDLO TOTALNE - RESETUJE LICZNIK!!!");
             }
 
-            //turaObrony();
 
         } else if (poleGracza.getStan() > 0 && poleGracza.getStan() < 6) {
             ai_playerService.getWyjatkowe_strzaly().add(poleGracza.getId());
@@ -108,7 +105,6 @@ public class GraWStatkiApiController {
             }
             if(ai_playerService.getLicznik_ataku()>1){
                 ai_playerService.dodajZKierunku(ai_playerService.getKierunek_ataku(), poleGracza.getId(), ai_playerService.getDostepneStrzaly(), "atakuj");
-                System.out.println("HALO, SLYSZY MNIE KTO?????????????????????????????????????");
             }
             if(ai_playerService.getTrafione_id()[poleGracza.getStan()-1]==ai_playerService.getPlanszaAI().getListaStatkowAI().get(poleGracza.getStan()-1).getDlugosc()){ //działa
                 System.out.println("Zatopiono statek! ");
@@ -117,12 +113,51 @@ public class GraWStatkiApiController {
                 ai_playerService.czyscDostepneStrzaly();
                 System.out.println(ai_playerService.getLicznik_ataku() + ai_playerService.getKierunek_ataku());
             }
-            // nie wiem, czy AI potrzebuje cokolwiek robić z tą informacją? Wszystko chyba obsługuję w metodzie atakuj.
-            // dodawanie trafionych pól, żeby w razie pustej listy móc dodać otoczenie.
         }
 
-        //int AI_atakuje_tutaj = ai_playerService.atakuj();
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @CrossOrigin
+    @GetMapping(value = "/statki/nazwa/{nazwa}")
+    public ResponseEntity<Void> otrzymajNazwe(@PathVariable("nazwa") String nazwaGracza){
+        LOGGER.info("### Serwer otrzymał nazwe gracza {}", nazwaGracza);
+
+        ai_playerService.ustawNazweGracza(nazwaGracza);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/statki/pobierz_nazwe")
+    public ResponseEntity<String> pobierzNazwe(){
+        LOGGER.info("### zazadano nazwy Gracza ");
+
+        String nazwaGracza;
+        if (!ai_playerService.getNazwaGracza().equals("")) nazwaGracza = ai_playerService.getNazwaGracza();
+        else nazwaGracza = "Nie podano nazwy gracza";
+
+        return new ResponseEntity<>(nazwaGracza, HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/statki/sprawdz_tryb")
+    public ResponseEntity<String> wyslijTryb() {
+
+        LOGGER.info("### Serwer otrzymal prosbe podania aktualnego trybu");
+        String aktualnyTryb = String.valueOf(ai_playerService.getTryb());
+
+        return new ResponseEntity<>(aktualnyTryb, HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/statki/wybor_trybu/{tryb}")
+    public ResponseEntity<String> okreslTryb(@PathVariable("tryb") Integer tryb) {
+
+        LOGGER.info("### Serwer otrzymal probe rozpoczecia danego trybu");
+
+        ai_playerService.ustawTryb(tryb);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -14,6 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class AI_PlayerServiceImpl implements AI_PlayerService {
     private Plansza planszaAI;
+    private String nazwaGracza = "";
+    private Integer trybServera = 0;
     public List<Integer> dostepne_strzaly = new ArrayList<>();
     public List<Integer> oddane_strzaly = new ArrayList<>();
     private int[] trafione_id = {0, 0, 0, 0, 0};
@@ -42,7 +44,6 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 polaPlanszy.add(new Pole(Integer.parseInt(String.valueOf(i + 1) + String.valueOf(0)), 0));
             }
             i++;
-            //System.out.println("id: " + polaPlanszy.get(i - 1).getId() + " x: " + polaPlanszy.get(i - 1).getWsp_x() + " y: " + polaPlanszy.get(i - 1).getWsp_y());
         }
         this.planszaAI = new Plansza(polaPlanszy);
     }
@@ -93,7 +94,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
             }
             id=drugie_pole.getId();
             System.out.println("wylosowane id kierunku: " + id);
-            //Pole drugie_pole = planszaGracza.getListaPol().get(dostepne[id]);
+
             if (drugie_pole.getWsp_x() == pole.getWsp_x()) {
                 statek.setKierunek('x');
                 dostepne.remove(Integer.valueOf(tmpID - 1));
@@ -122,7 +123,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
         catch (Exception e){
             usunStatek(statek,0);
             statek.getListaPol().clear();
-            System.out.println("Statek ma usterke - reset. --------------------------------------------------------------------------------------------------");
+            System.out.println("Statek ma usterke - reset. -----------------------------");
             ustawStatek(statek);
         }
 
@@ -211,22 +212,10 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
                 ids = ThreadLocalRandom.current().nextInt(1, 101);
                 idsTMP=ids;
             } else {
-                //if (licznik_ataku==2) { // 2 strzał z kolei
+
                 if (licznik_ataku==1) { // 2 strzał z kolei
-                    //dodajKierunki(ids, dostepne_strzaly, "atakuj");
+
                     ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));   //IllegalArgumentException
-                    /*Pole drugie_pole = planszaAI.getListaPol().get(ids - 1);
-                    if (drugie_pole.getWsp_x() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_x()) {
-                        setKierunek_ataku('x');
-                        System.out.println("Ustawiam kierunek ataku: " + kierunek_ataku);
-                        dostepne_strzaly.remove(Integer.valueOf(idsTMP - 1));
-                        dostepne_strzaly.remove(Integer.valueOf(idsTMP + 1));
-                    } else if (drugie_pole.getWsp_y() == planszaAI.getListaPol().get(idsTMP - 1).getWsp_y()) {
-                        setKierunek_ataku('y');
-                        System.out.println("Ustawiam kierunek ataku: " + kierunek_ataku);
-                        dostepne_strzaly.remove(Integer.valueOf(idsTMP - 10));
-                        dostepne_strzaly.remove(Integer.valueOf(idsTMP + 10));
-                    }*/
                 } else {
                     ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size()));
                 }
@@ -244,7 +233,7 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
             // pobierz otoczenie ostatnich trafień
 
             ids=dostepne_strzaly.get(ThreadLocalRandom.current().nextInt(dostepne_strzaly.size())); // to się teraz może wywalić, bo nie dodaję otoczenia po pustej liście.
-            System.out.println("PUSTA LISTA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            System.out.println("PUSTA LISTA+++++++++++++++++++++++");
         }
         while(oddane_strzaly.contains(ids)){
             if(dostepne_strzaly.isEmpty()) ids = ThreadLocalRandom.current().nextInt(1, 101);
@@ -307,5 +296,25 @@ public class AI_PlayerServiceImpl implements AI_PlayerService {
     @Override
     public List<Integer> getWyjatkowe_strzaly() {
         return wyjatkowe_strzaly;
+    }
+
+    @Override
+    public void ustawNazweGracza(String nazwa) {
+        this.nazwaGracza = nazwa;
+    }
+
+    @Override
+    public String getNazwaGracza() {
+        return this.nazwaGracza;
+    }
+
+    @Override
+    public void ustawTryb(Integer tryb) {
+        this.trybServera = tryb;
+    }
+
+    @Override
+    public Integer getTryb() {
+        return this.trybServera;
     }
 }
