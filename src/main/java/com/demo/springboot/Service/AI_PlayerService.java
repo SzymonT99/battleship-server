@@ -6,7 +6,7 @@ import com.demo.springboot.Model.Statek;
 
 import java.util.List;
 
-public interface AI_PlayerService {
+public interface AI_PlayerService { 
     public void inicjalizujPlansze();
     public void ustawFlote() throws Exception;
     public void ustawStatek(Statek statek) throws Exception;
